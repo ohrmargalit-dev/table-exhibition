@@ -398,7 +398,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const GEMINI_KEY = "AQ.Ab8RN6Ig4b40GPeNqlm0BeQBUK2_26a5yjTay2_uOqLAnKpOJA";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
 const SYSTEM_PROMPT = `שם התפקיד: אוצר דיאלוגי, מארח אינטראקטיבי וחוקר מלווה למיצג "זה השולחן אשר לפני ה׳ / Hoc est corpus meum_2".
 
@@ -513,7 +513,7 @@ async function callGemini(userMessage) {
     conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
     return reply;
   } catch(e) {
-    return 'אירעה שגיאה בחיבור. נסה שוב.';
+    console.error('Gemini error:', JSON.stringify(data)); return 'שגיאה: ' + JSON.stringify(data).substring(0,200);
   }
 }
 

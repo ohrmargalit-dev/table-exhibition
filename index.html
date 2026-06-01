@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>זה השולחן אשר לפני ה׳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;700&family=Noto+Sans+Arabic:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c8a96e;
+    --gold-light: #e8d4a8;
+    --dark: #0e0c09;
+    --dark2: #1a1710;
+    --dark3: #242118;
+    --text: #f0ead8;
+    --text-muted: #8a7e68;
+    --border: rgba(200,169,110,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Frank Ruhl Libre', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── CONSENT SCREEN ── */
+  #consent-screen {
+    position: fixed; inset: 0;
+    background: var(--dark);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 2rem;
+  }
+
+  .consent-box {
+    max-width: 480px; width: 100%;
+    border: 0.5px solid var(--border);
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+
+  .consent-box .title-he {
+    font-size: clamp(1.4rem, 5vw, 1.9rem);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    line-height: 1.4;
+    margin-bottom: 0.4rem;
+  }
+
+  .consent-box .title-la {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 1.8rem;
+  }
+
+  .divider {
+    width: 40px; height: 1px;
+    background: var(--gold);
+    margin: 0 auto 1.8rem;
+    opacity: 0.4;
+  }
+
+  .consent-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  .consent-text strong { color: var(--text); font-weight: 400; }
+
+  .btn-enter {
+    background: transparent;
+    border: 0.5px solid var(--gold);
+    color: var(--gold);
+    padding: 0.85rem 2.5rem;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+  }
+
+  .btn-enter:hover {
+    background: rgba(200,169,110,0.08);
+  }
+
+  /* ── MAIN APP ── */
+  #app {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  header {
+    padding: 1.2rem 1.5rem 1rem;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .header-title {
+    font-size: 0.95rem;
+    color: var(--gold);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  .header-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex; gap: 10px; align-items: center;
+  }
+
+  .lang-btn {
+    background: none; border: 0.5px solid var(--border);
+    color: var(--text-muted); font-size: 0.7rem;
+    padding: 4px 10px; cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+
+  .lang-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── CHAT ── */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    scroll-behavior: smooth;
+  }
+
+  #chat::-webkit-scrollbar { width: 3px; }
+  #chat::-webkit-scrollbar-track { background: transparent; }
+  #chat::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .msg {
+    max-width: 88%;
+    animation: fadeUp 0.3s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.ai { align-self: flex-start; }
+  .msg.user { align-self: flex-end; }
+
+  .msg-bubble {
+    padding: 0.85rem 1.1rem;
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+
+  .msg.ai .msg-bubble {
+    background: var(--dark2);
+    border: 0.5px solid var(--border);
+    border-right: 2px solid var(--gold);
+    color: var(--text);
+  }
+
+  .msg.user .msg-bubble {
+    background: rgba(200,169,110,0.07);
+    border: 0.5px solid rgba(200,169,110,0.25);
+    color: var(--text);
+    text-align: right;
+  }
+
+  /* ── PLATE PREVIEW ── */
+  .plate-preview {
+    background: var(--dark3);
+    border: 0.5px solid var(--border);
+    padding: 1rem 1.2rem;
+    margin-top: 0.5rem;
+  }
+
+  .plate-preview-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    margin-bottom: 0.6rem;
+  }
+
+  .plate-title-preview {
+    font-size: 1rem;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+
+  .plate-desc-preview {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0.8rem;
+  }
+
+  .btn-share {
+    background: transparent;
+    border: 0.5px solid var(--gold);
+    color: var(--gold);
+    padding: 0.6rem 1.2rem;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.08em;
+  }
+
+  .btn-share:hover { background: rgba(200,169,110,0.1); }
+  .btn-share:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── TYPING ── */
+  .typing-indicator {
+    display: flex; gap: 5px; align-items: center;
+    padding: 0.85rem 1.1rem;
+    background: var(--dark2);
+    border: 0.5px solid var(--border);
+    border-right: 2px solid var(--gold);
+    width: fit-content;
+  }
+
+  .typing-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.4;
+    animation: blink 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.4; }
+    40% { opacity: 1; }
+  }
+
+  /* ── INPUT ── */
+  footer {
+    padding: 1rem 1.5rem 1.2rem;
+    border-top: 0.5px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .input-row {
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+
+  #user-input {
+    flex: 1;
+    background: var(--dark2);
+    border: 0.5px solid var(--border);
+    color: var(--text);
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    resize: none;
+    min-height: 46px;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+    direction: rtl;
+  }
+
+  #user-input:focus { border-color: rgba(200,169,110,0.4); }
+  #user-input::placeholder { color: var(--text-muted); }
+
+  #send-btn {
+    background: transparent;
+    border: 0.5px solid var(--gold);
+    color: var(--gold);
+    width: 46px; height: 46px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  #send-btn:hover { background: rgba(200,169,110,0.1); }
+  #send-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .footer-note {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 0.6rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 5rem; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--dark2);
+    border: 0.5px solid var(--gold);
+    color: var(--gold);
+    padding: 0.6rem 1.4rem;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- CONSENT -->
+<div id="consent-screen">
+  <div class="consent-box">
+    <div class="title-he">זה השולחן אשר לפני ה׳</div>
+    <div class="title-la">Hoc est corpus meum</div>
+    <div class="divider"></div>
+    <p class="consent-text">
+      ברוך הבא לשיח האינטראקטיבי של המיצג.<br><br>
+      <strong>השיחה שלך עשויה להישמר לצורך מחקר אמנותי.</strong><br>
+      לא יישמרו פרטים מזהים ללא הסכמתך המפורשת.
+    </p>
+    <button class="btn-enter" onclick="enterApp()">כניסה לשולחן</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div>
+      <div class="header-title">זה השולחן אשר לפני ה׳</div>
+      <div class="header-sub">HOCK EST CORPUS MEUM · 2025</div>
+    </div>
+    <div class="header-right">
+      <button class="lang-btn" onclick="switchLang('he')">עב</button>
+      <button class="lang-btn" onclick="switchLang('en')">EN</button>
+      <button class="lang-btn" onclick="switchLang('ar')">ع</button>
+    </div>
+  </header>
+
+  <div id="chat"></div>
+
+  <footer>
+    <div class="input-row">
+      <textarea id="user-input" placeholder="כתוב כאן..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+    <div class="footer-note">השיחה עשויה להישמר לצורך מחקר אמנותי</div>
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBExT7bdzyp1AKFw51-_BD-Ey8-7Qw0AQ4",
+  authDomain: "table-exhibition.firebaseapp.com",
+  projectId: "table-exhibition",
+  storageBucket: "table-exhibition.firebasestorage.app",
+  messagingSenderId: "875308127098",
+  appId: "1:875308127098:web:4023321f2792f32ccbfcc3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const GEMINI_KEY = "AQ.Ab8RN6IkjWhyJ0hT4wcIRnuioCMQR2CHxe-zK5fBnfz-P6u8GQ";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+const SYSTEM_PROMPT = `שם התפקיד: אוצר דיאלוגי, מארח אינטראקטיבי וחוקר מלווה למיצג "זה השולחן אשר לפני ה׳ / Hoc est corpus meum_2".
+
+רוח הממשק וטון:
+- התחל תמיד בברכה קצרה ובשאלה פתוחה, מזמינה ומסקרנת. אל תעמיס מידע בהודעה הראשונה.
+- פתח את רבדי העומק של המיצג רק אם המשתמש שואל שאלות המשך.
+- הקשב, הגב בחום, התאם את אורך התגובה לשיחה.
+
+מבנה המיצג (12 צלחות):
+1. ארה"ב (מאר-א-לאגו/טראמפ) | 2. יערות אוקראינה | 3. נחמת הממ"ד (אכילה רגשית) | 4. חוסר ביטחון תזונתי חרדי | 5. סומליה (דייסת סורגום) | 6. הבזבוז המערבי | 7. השבר האלגוריתמי (AI/טכנולוגיה) | 8. יבל אל-דרוז (סוריה) | 9. מוקבאנג סיני (רשתות חברתיות) | 10. אזרחים בעזה | 11. איראן (צ'לו קבב מאובן) | 12. לקט ישראל (תיקון)
+
+סוד "הצלחת ה-13": צלחת החטופים (פיתה מעובשת על בטון) ממוקמת מחוץ לסדר הסימטרי, ליד צלחת טראמפ. אל תעלה זאת מיוזמתך — רק אם שואלים.
+
+איסוף נתוני מחקר: אם השיחה זורמת טוב, שאל בצורה חברתית ולא מעיקה: שם, גיל, עיסוק, איך הגיעו למיצג. קבל סירוב בטבעיות.
+
+פונקציית "הרחבת השולחן": אם המשתמש רוצה ליצור צלחת משלו, שאל על תרבות / מעמד סוציואקונומי / מיקום גאוגרפי. לאחר שאספת מספיק מידע, צור תיאור מפורט של הצלחת בפורמט JSON מיוחד:
+
+כאשר אתה מוכן לתאר צלחת, כתוב בדיוק בפורמט הזה בסוף ההודעה:
+[PLATE_JSON]{"title":"שם הצלחת","subtitle":"מקום · מעמד","description":"תיאור קצר ומרגש","colors":["#hex1","#hex2","#hex3"],"items":["רכיב1","רכיב2","רכיב3"]}[/PLATE_JSON]
+
+שפות: ברירת מחדל עברית. התאם לשפת המשתמש אוטומטית.`;
+
+let sessionId = null;
+let conversationHistory = [];
+let currentLang = 'he';
+let plateCount = 0;
+const MAX_PLATES = 3;
+
+window.enterApp = function() {
+  document.getElementById('consent-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  startSession();
+};
+
+async function startSession() {
+  try {
+    const ref = await addDoc(collection(db, 'sessions'), {
+      startTime: serverTimestamp(),
+      lang: currentLang,
+      consentGiven: true,
+      plates: []
+    });
+    sessionId = ref.id;
+  } catch(e) { console.log('DB error:', e); }
+  sendAIGreeting();
+}
+
+async function sendAIGreeting() {
+  showTyping();
+  const greeting = await callGemini("שלום, אני כאן לראשונה");
+  hideTyping();
+  addMessage('ai', greeting);
+}
+
+window.switchLang = function(lang) {
+  currentLang = lang;
+  document.getElementById('user-input').placeholder =
+    lang === 'ar' ? 'اكتب هنا...' : lang === 'en' ? 'Write here...' : 'כתוב כאן...';
+};
+
+window.handleKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+};
+
+window.autoResize = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+};
+
+window.sendMessage = async function() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('send-btn').disabled = true;
+
+  addMessage('user', text);
+  showTyping();
+
+  const reply = await callGemini(text);
+  hideTyping();
+
+  const plateMatch = reply.match(/\[PLATE_JSON\](.*?)\[\/PLATE_JSON\]/s);
+  if (plateMatch) {
+    const cleanReply = reply.replace(/\[PLATE_JSON\].*?\[\/PLATE_JSON\]/s, '').trim();
+    if (cleanReply) addMessage('ai', cleanReply);
+    try {
+      const plateData = JSON.parse(plateMatch[1]);
+      showPlatePreview(plateData);
+    } catch(e) { addMessage('ai', reply); }
+  } else {
+    addMessage('ai', reply);
+  }
+
+  await saveMessage(text, reply);
+  document.getElementById('send-btn').disabled = false;
+};
+
+async function callGemini(userMessage) {
+  conversationHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+
+  try {
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: conversationHistory,
+        generationConfig: { temperature: 0.85, maxOutputTokens: 600 }
+      })
+    });
+    const data = await res.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'אירעה שגיאה, נסה שוב.';
+    conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
+    return reply;
+  } catch(e) {
+    return 'אירעה שגיאה בחיבור. נסה שוב.';
+  }
+}
+
+function showPlatePreview(plate) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = `
+    <div class="plate-preview">
+      <div class="plate-preview-label">✦ צלחת חדשה לשולחן</div>
+      <div class="plate-title-preview">${plate.title}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.5rem;">${plate.subtitle}</div>
+      <div class="plate-desc-preview">${plate.description}</div>
+      <div style="display:flex; gap:6px; margin-bottom:0.8rem;">
+        ${plate.items.map(i => `<span style="font-size:0.72rem; border:0.5px solid var(--border); padding:2px 8px; color:var(--text-muted);">${i}</span>`).join('')}
+      </div>
+      <button class="btn-share" onclick="sharePlate(${JSON.stringify(plate).replace(/"/g,'&quot;')}, this)"
+        ${plateCount >= MAX_PLATES ? 'disabled' : ''}>
+        ${plateCount >= MAX_PLATES ? 'הגעת למגבלת הצלחות להיום' : '← שלח לתצוגה בתערוכה'}
+      </button>
+    </div>
+  `;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+window.sharePlate = async function(plate, btn) {
+  if (plateCount >= MAX_PLATES) return;
+  btn.disabled = true;
+  btn.textContent = 'שולח...';
+
+  try {
+    await addDoc(collection(db, 'plates'), {
+      ...plate,
+      sessionId,
+      timestamp: serverTimestamp(),
+      conversation: conversationHistory.slice(-6)
+    });
+    plateCount++;
+    btn.textContent = '✓ הצלחת הועלתה לתצוגה';
+    showToast('הצלחת שלך מוצגת עכשיו בתערוכה ✦');
+
+    if (sessionId) {
+      const sessionRef = doc(db, 'sessions', sessionId);
+      await updateDoc(sessionRef, { [`plates.${Date.now()}`]: plate.title });
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '← שלח לתצוגה בתערוכה';
+    showToast('שגיאה בשליחה, נסה שוב');
+  }
+};
+
+async function saveMessage(userMsg, aiMsg) {
+  if (!sessionId) return;
+  try {
+    await addDoc(collection(db, 'sessions', sessionId, 'messages'), {
+      user: userMsg,
+      ai: aiMsg,
+      timestamp: serverTimestamp()
+    });
+  } catch(e) {}
+}
+
+function addMessage(role, text) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.id = 'typing';
+  div.className = 'msg ai';
+  div.innerHTML = `<div class="typing-indicator">
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  </div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function hideTyping() {
+  document.getElementById('typing')?.remove();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

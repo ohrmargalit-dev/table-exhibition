@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תצוגה — זה השולחן אשר לפני ה׳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c8a96e;
+    --gold-light: #e8d4a8;
+    --dark: #0a0907;
+    --dark2: #131108;
+    --text: #f0ead8;
+    --text-muted: #6a5e48;
+    --border: rgba(200,169,110,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Frank Ruhl Libre', serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── WAITING STATE ── */
+  #waiting {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2rem;
+    transition: opacity 0.8s;
+  }
+
+  .waiting-title {
+    font-size: clamp(1.2rem, 3vw, 2.2rem);
+    font-weight: 300;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .waiting-sub {
+    font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    text-align: center;
+  }
+
+  .waiting-ornament {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  }
+
+  /* ── PLATE DISPLAY ── */
+  #plate-display {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4vh 6vw;
+  }
+
+  .plate-wrapper {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 6vw;
+    align-items: center;
+  }
+
+  /* ── PLATE VISUAL ── */
+  .plate-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .plate-svg-container {
+    width: clamp(220px, 35vw, 420px);
+    height: clamp(220px, 35vw, 420px);
+    position: relative;
+  }
+
+  .plate-svg-container svg {
+    width: 100%; height: 100%;
+  }
+
+  /* ── PLATE INFO ── */
+  .plate-info {
+    display: flex; flex-direction: column; gap: 1.2rem;
+  }
+
+  .plate-eyebrow {
+    font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+    letter-spacing: 0.25em;
+    color: var(--text-muted);
+  }
+
+  .plate-name {
+    font-size: clamp(1.8rem, 4vw, 3.5rem);
+    font-weight: 300;
+    color: var(--gold);
+    line-height: 1.2;
+  }
+
+  .plate-location {
+    font-size: clamp(0.75rem, 1.5vw, 1rem);
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .plate-divider {
+    width: 40px; height: 0.5px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .plate-description {
+    font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+    line-height: 1.85;
+    color: rgba(240,234,216,0.8);
+    font-weight: 300;
+  }
+
+  .plate-items {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+
+  .plate-item-tag {
+    font-size: clamp(0.6rem, 1vw, 0.72rem);
+    border: 0.5px solid var(--border);
+    padding: 3px 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── BOTTOM BAR ── */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.8rem 2.5rem;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .bottom-title {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.18em;
+  }
+
+  .bottom-count {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── TRANSITION ── */
+  .fade-in { animation: fadeIn 1.2s ease forwards; }
+  .fade-out { animation: fadeOut 0.6s ease forwards; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  /* ── NEW PLATE INDICATOR ── */
+  .new-badge {
+    position: fixed;
+    top: 2rem; left: 50%;
+    transform: translateX(-50%);
+    background: transparent;
+    border: 0.5px solid var(--gold);
+    color: var(--gold);
+    padding: 0.4rem 1.5rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  .new-badge.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- WAITING -->
+<div id="waiting">
+  <div class="waiting-title">
+    זה השולחן אשר לפני ה׳<br>
+    <span style="font-size:0.5em; letter-spacing:0.2em; color:var(--text-muted);">Hoc est corpus meum</span>
+  </div>
+  <div class="waiting-ornament"></div>
+  <div class="waiting-sub">סרוק את הברקוד כדי להוסיף צלחת לשולחן</div>
+</div>
+
+<!-- PLATE DISPLAY -->
+<div id="plate-display">
+  <div class="plate-wrapper" id="plate-wrapper">
+    <div class="plate-visual">
+      <div class="plate-svg-container" id="plate-svg"></div>
+    </div>
+    <div class="plate-info" id="plate-info"></div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="bottom-title">זה השולחן אשר לפני ה׳ · 2025</div>
+  <div class="bottom-count" id="plate-counter">ממתין לצלחות...</div>
+</div>
+
+<div class="new-badge" id="new-badge">✦ צלחת חדשה הצטרפה לשולחן</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy, limit }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBExT7bdzyp1AKFw51-_BD-Ey8-7Qw0AQ4",
+  authDomain: "table-exhibition.firebaseapp.com",
+  projectId: "table-exhibition",
+  storageBucket: "table-exhibition.firebasestorage.app",
+  messagingSenderId: "875308127098",
+  appId: "1:875308127098:web:4023321f2792f32ccbfcc3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let totalPlates = 0;
+let currentPlateId = null;
+let isFirstLoad = true;
+
+// Listen for new plates in real time
+const q = query(collection(db, 'plates'), orderBy('timestamp', 'desc'), limit(20));
+
+onSnapshot(q, (snapshot) => {
+  totalPlates = snapshot.size;
+  document.getElementById('plate-counter').textContent =
+    totalPlates === 0 ? 'ממתין לצלחות...' :
+    `${totalPlates} צלחת${totalPlates !== 1 ? 'ות' : ''} על השולחן`;
+
+  if (snapshot.empty) return;
+
+  const latest = snapshot.docs[0];
+  if (latest.id === currentPlateId) return;
+
+  if (!isFirstLoad) showNewBadge();
+  isFirstLoad = false;
+
+  currentPlateId = latest.id;
+  displayPlate(latest.data());
+});
+
+function displayPlate(plate) {
+  const display = document.getElementById('plate-display');
+  const waiting = document.getElementById('waiting');
+
+  waiting.style.opacity = '0';
+  setTimeout(() => { waiting.style.display = 'none'; }, 800);
+
+  // Build SVG plate
+  const colors = plate.colors || ['#8B4513', '#4a7c3f', '#c8a96e'];
+  const svgEl = document.getElementById('plate-svg');
+  svgEl.innerHTML = generatePlateSVG(plate, colors);
+
+  // Build info
+  const info = document.getElementById('plate-info');
+  info.innerHTML = `
+    <div class="plate-eyebrow">✦ צלחת חדשה על השולחן</div>
+    <div class="plate-name">${plate.title || ''}</div>
+    <div class="plate-location">${plate.subtitle || ''}</div>
+    <div class="plate-divider"></div>
+    <div class="plate-description">${plate.description || ''}</div>
+    ${plate.items ? `
+    <div class="plate-items">
+      ${plate.items.map(i => `<span class="plate-item-tag">${i}</span>`).join('')}
+    </div>` : ''}
+  `;
+
+  display.style.display = 'flex';
+  const wrapper = document.getElementById('plate-wrapper');
+  wrapper.classList.remove('fade-in');
+  void wrapper.offsetWidth;
+  wrapper.classList.add('fade-in');
+}
+
+function generatePlateSVG(plate, colors) {
+  const c1 = colors[0] || '#8B4513';
+  const c2 = colors[1] || '#4a7c3f';
+  const c3 = colors[2] || '#c8a96e';
+  const items = plate.items || [];
+
+  // Generate a deterministic but varied plate based on title
+  const seed = (plate.title || 'x').charCodeAt(0);
+  const angle = (seed * 137) % 360;
+
+  return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Plate rim -->
+    <circle cx="200" cy="200" r="195" fill="#e8e0d5" stroke="#c4b49a" stroke-width="2"/>
+    <circle cx="200" cy="200" r="185" fill="#d4c4a8" stroke="#b8a080" stroke-width="0.5"/>
+    <!-- Inner plate -->
+    <circle cx="200" cy="200" r="160" fill="#f0e8d8"/>
+
+    <!-- Main food element 1 -->
+    <ellipse cx="200" cy="200" rx="90" ry="75"
+      fill="${c1}" opacity="0.9"
+      transform="rotate(${angle}, 200, 200)"/>
+    <ellipse cx="200" cy="200" rx="75" ry="60"
+      fill="${c1}" opacity="0.7"
+      transform="rotate(${angle + 20}, 200, 200)"/>
+
+    <!-- Food element 2 -->
+    <ellipse cx="${180 + seed % 30}" cy="${170 + seed % 25}" rx="35" ry="25"
+      fill="${c2}" opacity="0.85"
+      transform="rotate(${angle * 0.7}, 200, 200)"/>
+
+    <!-- Accent / sauce -->
+    <path d="M ${155 + seed%20} ${190 + seed%15}
+             Q ${200 + seed%15} ${165 + seed%20}
+               ${240 + seed%10} ${195 + seed%15}
+             Q ${250 + seed%10} ${215 + seed%10}
+               ${220 + seed%15} ${225 + seed%10}"
+      fill="none" stroke="${c3}" stroke-width="${4 + seed%3}"
+      stroke-linecap="round" opacity="0.8"/>
+
+    <!-- Garnish dots -->
+    ${[0,1,2,3].map(i => `
+      <circle cx="${170 + i*20 + seed%8}" cy="${155 + i%2*10 + seed%8}"
+        r="${2 + i%2}" fill="${c3}" opacity="${0.5 + i*0.1}"/>
+    `).join('')}
+
+    <!-- Salt/texture dots on main -->
+    <circle cx="${195 + seed%10}" cy="${192 + seed%8}" r="2" fill="white" opacity="0.7"/>
+    <circle cx="${205 + seed%8}" cy="${198 + seed%10}" r="2" fill="white" opacity="0.7"/>
+    <circle cx="${200}" cy="${205 + seed%8}" r="1.5" fill="white" opacity="0.6"/>
+
+    <!-- Rim decoration -->
+    ${[0,1,2,3,4,5,6,7].map(i => {
+      const a = (i * 45 + angle * 0.3) * Math.PI / 180;
+      const x = 200 + Math.cos(a) * 178;
+      const y = 200 + Math.sin(a) * 178;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="${c3}" opacity="0.4"/>`;
+    }).join('')}
+  </svg>`;
+}
+
+function showNewBadge() {
+  const badge = document.getElementById('new-badge');
+  badge.classList.add('show');
+  setTimeout(() => badge.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

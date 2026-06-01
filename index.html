@@ -443,14 +443,7 @@ async function startSession() {
     });
     sessionId = ref.id;
   } catch(e) { console.log('DB error:', e); }
-  sendAIGreeting();
-}
-
-async function sendAIGreeting() {
-  showTyping();
-  const greeting = await callGemini("שלום, אני כאן לראשונה");
-  hideTyping();
-  addMessage('ai', greeting);
+  addMessage('ai', 'שלום, ברוך הבא לשולחן.\n\nהאם יש צלחת מסוימת שמשכה את תשומת לבך? או שתרצה לספר מאיפה אתה מגיע?');
 }
 
 window.switchLang = function(lang) {

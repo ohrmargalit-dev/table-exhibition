@@ -499,14 +499,15 @@ async function callGemini(userMessage) {
   conversationHistory.push({ role: 'user', parts: [{ text: userMessage }] });
 
   try {
+    const requestBody = {
+      contents: conversationHistory,
+      generationConfig: { temperature: 0.85, maxOutputTokens: 600 }
+    };
+
     const res = await fetch(GEMINI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: conversationHistory,
-        generationConfig: { temperature: 0.85, maxOutputTokens: 600 }
-      })
+      body: JSON.stringify(requestBody)
     });
     const data = await res.json();
     

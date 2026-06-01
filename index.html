@@ -397,10 +397,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const GEMINI_KEY = "AQ.Ab8RN6Ig4b40GPeNqlm0BeQBUK2_26a5yjTay2_uOqLAnKpOJA";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_KEY = "AIzaSyCfjVskVFb8DiKDuti4JcWol5rV67t2Tko";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
-const SYSTEM_PROMPT = `שם התפקיד: אוצר דיאלוגי, מארח אינטראקטיבי וחוקר מלווה למיצג "זה השולחן אשר לפני ה׳ / Hoc est corpus meum_2[...]
+const SYSTEM_PROMPT = `שם התפקיד: אוצר דיאלוגי, מארח אינטראקטיבי וחוקר מלווה למיצג "זה השולחן אשר לפני ה׳ / Hoc est corpus meum_2".
 
 רוח הממשק וטון:
 - התחל תמיד בברכה קצרה ובשאלה פתוחה, מזמינה ומסקרנת. אל תעמיס מידע בהודעה הראשונה.
@@ -408,16 +408,16 @@ const SYSTEM_PROMPT = `שם התפקיד: אוצר דיאלוגי, מארח אי
 - הקשב, הגב בחום, התאם את אורך התגובה לשיחה.
 
 מבנה המיצג (12 צלחות):
-1. ארה"ב (מאר-א-לאגו/טראמפ) | 2. יערות אוקראינה | 3. נחמת הממ"ד (אכילה רגשית) | 4. חוסר ביטחון תזונתי חרדי | 5. סומליה (�[...]
+1. ארה"ב (מאר-א-לאגו/טראמפ) | 2. יערות אוקראינה | 3. נחמת הממ"ד (אכילה רגשית) | 4. חוסר ביטחון תזונתי חרדי | 5. סומליה (דייסת סורגום) | 6. הבזבוז המערבי | 7. השבר האלגוריתמי (AI/טכנולוגיה) | 8. יבל אל-דרוז (סוריה) | 9. מוקבאנג סיני (רשתות חברתיות) | 10. אזרחים בעזה | 11. איראן (צ'לו קבב מאובן) | 12. לקט ישראל (תיקון)
 
-סוד "הצלחת ה-13": צלחת החטופים (פיתה מעובשת על בטון) ממוקמת מחוץ לסדר הסימטרי, ליד צלחת טראמפ. אל תעלה זאת מיוזמ[...]
+סוד "הצלחת ה-13": צלחת החטופים (פיתה מעובשת על בטון) ממוקמת מחוץ לסדר הסימטרי, ליד צלחת טראמפ. אל תעלה זאת מיוזמתך — רק אם שואלים.
 
-איסוף נתוני מחקר: אם השיחה זורמת טוב, שאל בצורה חברתית ולא מעיקה: שם, גיל, עיסוק, איך הגיעו למיצג. קבל סירוב בט[...]
+איסוף נתוני מחקר: אם השיחה זורמת טוב, שאל בצורה חברתית ולא מעיקה: שם, גיל, עיסוק, איך הגיעו למיצג. קבל סירוב בטבעיות.
 
-פונקציית "הרחבת השולחן": אם המשתמש רוצה ליצור צלחת משלו, שאל על תרבות / מעמד סוציואקונומי / מיקום גאוגרפי. לאח[...]
+פונקציית "הרחבת השולחן": אם המשתמש רוצה ליצור צלחת משלו, שאל על תרבות / מעמד סוציואקונומי / מיקום גאוגרפי. לאחר שאספת מספיק מידע, צור תיאור מפורט של הצלחת בפורמט JSON מיוחד:
 
 כאשר אתה מוכן לתאר צלחת, כתוב בדיוק בפורמט הזה בסוף ההודעה:
-[PLATE_JSON]{"title":"שם הצלחת","subtitle":"מקום · מעמד","description":"תיאור קצר ומרגש","colors":["#hex1","#hex2","#hex3"],"items":["רכיב1","רכיב2","רכיב[...]
+[PLATE_JSON]{"title":"שם הצלחת","subtitle":"מקום · מעמד","description":"תיאור קצר ומרגש","colors":["#hex1","#hex2","#hex3"],"items":["רכיב1","רכיב2","רכיב3"]}[/PLATE_JSON]
 
 שפות: ברירת מחדל עברית. התאם לשפת המשתמש אוטומטית.`;
 
@@ -499,29 +499,21 @@ async function callGemini(userMessage) {
   conversationHistory.push({ role: 'user', parts: [{ text: userMessage }] });
 
   try {
-    const requestBody = {
-      contents: conversationHistory,
-      generationConfig: { temperature: 0.85, maxOutputTokens: 600 }
-    };
-
     const res = await fetch(GEMINI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: conversationHistory,
+        generationConfig: { temperature: 0.85, maxOutputTokens: 600 }
+      })
     });
     const data = await res.json();
-    
-    if (!res.ok) {
-      console.error('Gemini API error:', data);
-      return 'שגיאה בחיבור ל-AI: ' + (data.error?.message || 'נסה שוב בעוד רגע');
-    }
-    
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'אירעה שגיאה, נסה שוב.';
     conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
     return reply;
   } catch(e) {
-    console.error('Gemini fetch error:', e.message);
-    return 'שגיאה בחיבור ל-AI. בדוק את חיבור האינטרנט שלך ונסה שוב.';
+    console.error('Gemini error:', JSON.stringify(data)); return 'שגיאה: ' + JSON.stringify(data).substring(0,200);
   }
 }
 
